@@ -68,7 +68,7 @@ qiime phylogeny fasttree --i-alignment masked-aligned-rep-seqs.qza --o-tree unro
 qiime phylogeny midpoint-root --i-tree unrooted-tree.qza --o-rooted-tree rooted-tree.qza
 
 #Create a base statistics directory with the table of your choice
-qiime diversity core-metrics-phylogenetic --i-phylogeny rooted-tree.qza --i-table [Your chosen table] --p-sampling-depth [Your choice of sampling depth] 
+qiime diversity core-metrics-phylogenetic --i-phylogeny rooted-tree.qza --i-table filtered-table_v3.qza --p-sampling-depth 1000 
 --m-metadata-file [Your metadata file] --output-dir core-metrics-results
 
 #You now have many statisitcal tests of your data within the core-metrics-results folders. You can now make visualizations of this data for Qiime2view. The following code will give you 
