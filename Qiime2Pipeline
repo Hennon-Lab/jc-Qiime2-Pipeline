@@ -37,18 +37,19 @@ qiime taxa barplot --i-table filtered_table.qza --i-taxonomy classification.qza 
 #########################################################################################################################################################################################
 #Filtering your classified sequences. You may want to filter your table based on a variety of factors. The following code can be used to do so. 
 
-#Frequency-based filtering. This step will remove samples containing a sequence number below a certain threshold. 
-qiime feature-table filter-samples --i-table [Your table] --p-min-frequency 1000 --o-filtered-table sample-frequency-filtered-table.qza
-
-#Sample-based filtering. This step will remove samples which you do not want to include in your final analysis. You will need to make a second metadata file that only includes the 
-#samples you want. 
-qiime feature-table filter-samples --i-table [Your classification] --m-metadata-file [Your classification table] --o-filtered-table id-filtered-table.qza
-
 #Sequence-based filtering. This step will remove unwanted sequences from your table- unassigned, chloroplast, vertebrate, etc. You can also determine what sequences you'd like to keep
 #It is not necessary to use both "--p-include" and "--p-exclude" in your code but you can. For 16S reads, we removed Chloroplast and Unassigned. For 18S reads, we removed metazoans, Unassigned, 
 #and those reads not refined to the class level (p-include c)
-qiime taxa filter-table --i-table [Your table] --i-taxonomy classification.qza --p-include [Samples to include] --p-exclude [Samples to be excluded] 
---o-filtered-sequences sequence-filtered-table.qza
+
+qiime taxa filter-table --i-table [Your table] --i-taxonomy classification.qza --p-include [p] --p-exclude [Unassigned,Chloroplast,Eukaryota] --o-filtered-sequences filtered-table_v2.qza #16S
+qiime taxa filter-table --i-table [Your table] --i-taxonomy classification.qza --p-include [c] --p-exclude [Unassigned,Metazoa,Bacteria,Eukaryota:nucl,Eukaryota:plas,Eukaryota:mito] --o-filtered-sequences filtered-table_v2.qza #18S
+
+#Frequency-based filtering. This step will remove samples containing a sequence number below a certain threshold. 
+qiime feature-table filter-samples --i-table [Your table] --p-min-frequency 1000 --o-filtered-table filtered-table_v3.qza
+
+#Rarefaction. This step will rarefy the table and computes the average number of each ASV to create the final ASV table. This step requires the installation of a Qiime2 plugin from github.
+pip install git+https://github.com/yxia0125/q2-repeat-rarefy.git
+qiime repeat-rarefy repeat-rarefy --i-table filtered-table_v3.qza --p-sampling-depth 1000 --p-repeat-times 100 --o-rarefied-table filtered_sequence_v4.qza
 #########################################################################################################################################################################################
 #Statistics and visualization. Qiime2 can perform a number of statistical tests and visualizations of said statisitcs.
 #Before running these statistics, you need to make build a phytogenetic tree by using Mafft to run a multiple sequence alignment. This step should be performed in your "filtered" 
@@ -73,7 +74,3 @@ qiime diversity core-metrics-phylogenetic --i-phylogeny rooted-tree.qza --i-tabl
 #You now have many statisitcal tests of your data within the core-metrics-results folders. You can now make visualizations of this data for Qiime2view. The following code will give you 
 #visualization for Shannon Diversity
 qiime diversity alpha-group-significance --i-alpha-diversity shannon_vector.qza --m-metadata-file [Your metadata file] --o-visualization shannon_group-significance.qzv
-
-#You can also make a v0 graph of beta diversity based on several metrices for Qiime2view. You can look for differences based on a chosen categorical variable. 
-qiime diversity beta-group-significance --i-distance-matrix [Chosen beta diversity method] --m-metadata-file [Your metadata file] --m-metadata-column [Chosen metadata variable] 
---o-visualization unweighted-unifrac-month-significance.qzv --p-pairwise
